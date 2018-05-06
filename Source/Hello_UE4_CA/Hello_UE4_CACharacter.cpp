@@ -10,7 +10,9 @@
 #include "GameFramework/SpringArmComponent.h"
 
 // h529
+#include "Components/PoseableMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Engine/Engine.h"
 #include "DrawDebugHelpers.h"
 
@@ -20,7 +22,7 @@
 AHello_UE4_CACharacter::AHello_UE4_CACharacter()
 {
 	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(20.f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(10.f, 96.0f);
 	
 
 	// set our turn rates for input
@@ -208,17 +210,7 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 		RV_TraceParams_L
 	);
 
-
-	/** Move Right Foot **/
-	if (!RV_Hit_R.bBlockingHit)
-	{
-		
-	}
-	else
-	{
-
-	}
-
+	// blocked here
 
 	if (isDebugMode)
 	{
