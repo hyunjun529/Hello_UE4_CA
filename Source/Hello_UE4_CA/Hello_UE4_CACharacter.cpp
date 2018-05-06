@@ -143,6 +143,11 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	float lineLength = 20.f;
+
+
+	/** get World Location **/
 	// get location from Actor
 	float characterLocationX = this->GetActorLocation().X;
 	float characterLocationY = this->GetActorLocation().Y;
@@ -153,34 +158,63 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 	// make locVec
 	FVector centerLoc(characterLocationX, characterLocationY, characterLocationZ);
 
+
+	/** get Socket Local Location **/
 	// get location from Mesh.Socket foot
 	FVector d3FootRLoc = GetMesh()->GetSocketLocation("foot_r");
 	FVector d3FootLLoc = GetMesh()->GetSocketLocation("foot_l");
 
-	// make 2D, Real
+	// make 2D, Real(3D)
 	FVector d2FootRLoc = d3FootRLoc;
 	FVector d2FootLLoc = d3FootLLoc;
 
 	d2FootRLoc.Z = centerLoc.Z;
 	d2FootLLoc.Z = centerLoc.Z;
 
+	
+	/** LineTrace, BreakHit : Right **/
+	FCollisionQueryParams RV_TraceParams_R = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
+	RV_TraceParams_R.bTraceComplex = true;
+	RV_TraceParams_R.bTraceAsyncScene = true;
+	RV_TraceParams_R.bReturnPhysicalMaterial = false;
+
+	//Re-initialize hit info
+	FHitResult RV_Hit_R(ForceInit);
+
+	//call GetWorld() from within an actor extending class
+	GetWorld()->LineTraceSingleByChannel(
+		RV_Hit_R,        //result
+		d3FootRLoc,    //start
+		FVector(d2FootRLoc.X, d2FootRLoc.Y, d2FootRLoc.Z - lineLength), //end
+		ECC_Pawn, //collision channel
+		RV_TraceParams_R
+	);
+
+
+	/** LineTrace, BreakHit : Left **/
+	FCollisionQueryParams RV_TraceParams_L = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
+	RV_TraceParams_L.bTraceComplex = true;
+	RV_TraceParams_L.bTraceAsyncScene = true;
+	RV_TraceParams_L.bReturnPhysicalMaterial = false;
+
+	FHitResult RV_Hit_L(ForceInit);
+
+	GetWorld()->LineTraceSingleByChannel(
+		RV_Hit_L,        //result
+		d3FootRLoc,    //start
+		FVector(d2FootLLoc.X, d2FootLLoc.Y, d2FootLLoc.Z - lineLength), //end
+		ECC_Pawn, //collision channel
+		RV_TraceParams_L
+	);
+
 
 	if (isDebugMode)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3600.0f, FColor::Blue,
-			FString::Printf(TEXT("Actor : x: %f, y: %f, z: %f "),
-				characterLocationX, characterLocationY, characterLocationZ)
-		);
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Purple,
+			FString::Printf(TEXT("is stick to? [ (L : %s), (R : %s) ]"),
+			(RV_Hit_L.bBlockingHit) ? ("Y") : ("N"), (RV_Hit_R.bBlockingHit) ? ("Y") : ("N"))
+			);
 
-		GEngine->AddOnScreenDebugMessage(-1, 3600.0f, FColor::Green,
-			FString::Printf(TEXT("FootR : x: %f, y: %f"),
-				d3FootRLoc.X, d3FootRLoc.Y)
-		);
-
-		GEngine->AddOnScreenDebugMessage(-1, 3600.0f, FColor::Green,
-			FString::Printf(TEXT("FootL : x: %f, y: %f"),
-				d3FootLLoc.X, d3FootLLoc.Y)
-		);
 
 		DrawDebugPoint(GetWorld(), d3FootRLoc, 10, FColor(255, 0, 0), false, 0.25f);
 		DrawDebugPoint(GetWorld(), d3FootLLoc, 10, FColor(0, 0, 255), false, 0.25f);
