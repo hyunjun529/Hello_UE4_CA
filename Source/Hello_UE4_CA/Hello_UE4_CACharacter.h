@@ -68,5 +68,12 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	/** h529 **/
+private:
+	bool isDebugMode = true;
+
+public:
+	virtual void Tick(float DeltaTime) override;
 };
 

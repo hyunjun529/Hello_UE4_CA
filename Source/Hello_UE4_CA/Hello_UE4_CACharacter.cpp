@@ -9,13 +9,18 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+// h529
+#include "Engine/Engine.h"
+#include "DrawDebugHelpers.h"
+
 //////////////////////////////////////////////////////////////////////////
 // AHello_UE4_CACharacter
 
 AHello_UE4_CACharacter::AHello_UE4_CACharacter()
 {
 	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(20.f, 96.0f);
+	
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
@@ -29,8 +34,8 @@ AHello_UE4_CACharacter::AHello_UE4_CACharacter()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 600.f;
-	GetCharacterMovement()->AirControl = 0.2f;
+	GetCharacterMovement()->JumpZVelocity = 500.f;
+	GetCharacterMovement()->AirControl = 0.5f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -130,5 +135,71 @@ void AHello_UE4_CACharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+	}
+}
+
+/** h529 **/
+void AHello_UE4_CACharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// get location from Actor
+	float characterLocationX = this->GetActorLocation().X;
+	float characterLocationY = this->GetActorLocation().Y;
+
+	// get location from Capsule
+	float characterLocationZ = GetCapsuleComponent()->GetComponentLocation().Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+	// make locVec
+	FVector centerLoc(characterLocationX, characterLocationY, characterLocationZ);
+
+	// get location from Mesh.Socket foot
+	FVector offsetFootRLoc = GetMesh()->GetSocketLocation("foot_r");
+	FVector offsetFootLLoc = GetMesh()->GetSocketLocation("foot_l");
+
+	// make offset, location
+	//offsetFootRLoc = offsetFootRLoc - centerLoc;
+	offsetFootRLoc.Z = centerLoc.Z;
+	//offsetFootLLoc = offsetFootLLoc - centerLoc;
+	offsetFootLLoc.Z = centerLoc.Z;
+
+
+	if (isDebugMode)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3600.0f, FColor::Blue,
+			FString::Printf(TEXT("Actor : x: %f, y: %f, z: %f "),
+				characterLocationX, characterLocationY, characterLocationZ)
+		);
+
+		GEngine->AddOnScreenDebugMessage(-1, 3600.0f, FColor::Green,
+			FString::Printf(TEXT("FootR : x: %f, y: %f"),
+				offsetFootRLoc.X, offsetFootRLoc.Y)
+		);
+
+		GEngine->AddOnScreenDebugMessage(-1, 3600.0f, FColor::Green,
+			FString::Printf(TEXT("FootL : x: %f, y: %f"),
+				offsetFootLLoc.X, offsetFootLLoc.Y)
+		);
+
+		DrawDebugPoint(GetWorld(), offsetFootRLoc, 10, FColor(255, 0, 0), false, 0.25f);
+		DrawDebugPoint(GetWorld(), offsetFootLLoc, 10, FColor(0, 0, 255), false, 0.25f);
+
+		float dbgLineLength = 20.f;
+		DrawDebugLine(
+			GetWorld(),
+			FVector(offsetFootRLoc.X, offsetFootRLoc.Y, offsetFootRLoc.Z + dbgLineLength),
+			FVector(offsetFootRLoc.X, offsetFootRLoc.Y, offsetFootRLoc.Z - dbgLineLength),
+			FColor(255, 0, 0),
+			false, -1, 0,
+			2.f
+		);
+		DrawDebugLine(
+			GetWorld(),
+			FVector(offsetFootLLoc.X, offsetFootLLoc.Y, offsetFootLLoc.Z + dbgLineLength),
+			FVector(offsetFootLLoc.X, offsetFootLLoc.Y, offsetFootLLoc.Z - dbgLineLength),
+			FColor(0, 0, 255),
+			false, -1, 0,
+			2.f
+		);
 	}
 }
