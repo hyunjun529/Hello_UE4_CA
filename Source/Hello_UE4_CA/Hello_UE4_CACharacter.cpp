@@ -154,14 +154,15 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 	FVector centerLoc(characterLocationX, characterLocationY, characterLocationZ);
 
 	// get location from Mesh.Socket foot
-	FVector offsetFootRLoc = GetMesh()->GetSocketLocation("foot_r");
-	FVector offsetFootLLoc = GetMesh()->GetSocketLocation("foot_l");
+	FVector d3FootRLoc = GetMesh()->GetSocketLocation("foot_r");
+	FVector d3FootLLoc = GetMesh()->GetSocketLocation("foot_l");
 
-	// make offset, location
-	//offsetFootRLoc = offsetFootRLoc - centerLoc;
-	offsetFootRLoc.Z = centerLoc.Z;
-	//offsetFootLLoc = offsetFootLLoc - centerLoc;
-	offsetFootLLoc.Z = centerLoc.Z;
+	// make 2D, Real
+	FVector d2FootRLoc = d3FootRLoc;
+	FVector d2FootLLoc = d3FootLLoc;
+
+	d2FootRLoc.Z = centerLoc.Z;
+	d2FootLLoc.Z = centerLoc.Z;
 
 
 	if (isDebugMode)
@@ -173,30 +174,31 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 
 		GEngine->AddOnScreenDebugMessage(-1, 3600.0f, FColor::Green,
 			FString::Printf(TEXT("FootR : x: %f, y: %f"),
-				offsetFootRLoc.X, offsetFootRLoc.Y)
+				d3FootRLoc.X, d3FootRLoc.Y)
 		);
 
 		GEngine->AddOnScreenDebugMessage(-1, 3600.0f, FColor::Green,
 			FString::Printf(TEXT("FootL : x: %f, y: %f"),
-				offsetFootLLoc.X, offsetFootLLoc.Y)
+				d3FootLLoc.X, d3FootLLoc.Y)
 		);
 
-		DrawDebugPoint(GetWorld(), offsetFootRLoc, 10, FColor(255, 0, 0), false, 0.25f);
-		DrawDebugPoint(GetWorld(), offsetFootLLoc, 10, FColor(0, 0, 255), false, 0.25f);
+		DrawDebugPoint(GetWorld(), d3FootRLoc, 10, FColor(255, 0, 0), false, 0.25f);
+		DrawDebugPoint(GetWorld(), d3FootLLoc, 10, FColor(0, 0, 255), false, 0.25f);
+		DrawDebugPoint(GetWorld(), centerLoc, 10, FColor(255, 0, 255), false, 0.25f);
 
 		float dbgLineLength = 20.f;
 		DrawDebugLine(
 			GetWorld(),
-			FVector(offsetFootRLoc.X, offsetFootRLoc.Y, offsetFootRLoc.Z + dbgLineLength),
-			FVector(offsetFootRLoc.X, offsetFootRLoc.Y, offsetFootRLoc.Z - dbgLineLength),
+			FVector(d2FootRLoc.X, d2FootRLoc.Y, d2FootRLoc.Z + dbgLineLength),
+			FVector(d2FootRLoc.X, d2FootRLoc.Y, d2FootRLoc.Z - dbgLineLength),
 			FColor(255, 0, 0),
 			false, -1, 0,
 			2.f
 		);
 		DrawDebugLine(
 			GetWorld(),
-			FVector(offsetFootLLoc.X, offsetFootLLoc.Y, offsetFootLLoc.Z + dbgLineLength),
-			FVector(offsetFootLLoc.X, offsetFootLLoc.Y, offsetFootLLoc.Z - dbgLineLength),
+			FVector(d2FootLLoc.X, d2FootLLoc.Y, d2FootLLoc.Z + dbgLineLength),
+			FVector(d2FootLLoc.X, d2FootLLoc.Y, d2FootLLoc.Z - dbgLineLength),
 			FColor(0, 0, 255),
 			false, -1, 0,
 			2.f
