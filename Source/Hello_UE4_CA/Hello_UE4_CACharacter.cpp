@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 
 // h529
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 #include "DrawDebugHelpers.h"
 
@@ -208,6 +209,17 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 	);
 
 
+	/** Move Right Foot **/
+	if (!RV_Hit_R.bBlockingHit)
+	{
+		
+	}
+	else
+	{
+
+	}
+
+
 	if (isDebugMode)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Purple,
@@ -220,7 +232,7 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 		DrawDebugPoint(GetWorld(), d3FootLLoc, 10, FColor(0, 0, 255), false, 0.25f);
 		DrawDebugPoint(GetWorld(), centerLoc, 10, FColor(255, 0, 255), false, 0.25f);
 
-		float dbgLineLength = 20.f;
+		float dbgLineLength = lineLength;
 		DrawDebugLine(
 			GetWorld(),
 			FVector(d2FootRLoc.X, d2FootRLoc.Y, d2FootRLoc.Z + dbgLineLength),
