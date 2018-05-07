@@ -62,6 +62,8 @@ AHello_UE4_CACharacter::AHello_UE4_CACharacter()
 	footPrintL.X = 0.f;
 	footPrintL.Y = 0.f;
 	footPrintL.Z = 0.f;
+
+	pelvis = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -156,7 +158,7 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	float lineLength = 20.f;
+	float lineLength = 40.f;
 
 
 	/** get World Location **/
@@ -196,7 +198,7 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 	//call GetWorld() from within an actor extending class
 	GetWorld()->LineTraceSingleByChannel(
 		RV_Hit_R,        //result
-		d3FootRLoc,    //start
+		FVector(d2FootRLoc.X, d2FootRLoc.Y, d2FootRLoc.Z + lineLength),    //start
 		FVector(d2FootRLoc.X, d2FootRLoc.Y, d2FootRLoc.Z - lineLength), //end
 		ECC_Pawn, //collision channel
 		RV_TraceParams_R
@@ -213,7 +215,7 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 
 	GetWorld()->LineTraceSingleByChannel(
 		RV_Hit_L,        //result
-		d3FootRLoc,    //start
+		FVector(d2FootLLoc.X, d2FootLLoc.Y, d2FootLLoc.Z + lineLength),    //start
 		FVector(d2FootLLoc.X, d2FootLLoc.Y, d2FootLLoc.Z - lineLength), //end
 		ECC_Pawn, //collision channel
 		RV_TraceParams_L
@@ -221,21 +223,49 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 
 
 	// update foot print
-	footPrintR.X = RV_Hit_R.ImpactPoint.X;
-	footPrintR.Y = RV_Hit_R.ImpactPoint.Y;
-	footPrintR.Z = RV_Hit_R.ImpactPoint.Z;
+	FVector toLocalHitPoint_R = FVector(0, 0, 0);
+	FVector toLocalHitPoint_L = FVector(0, 0, 0);
 
-	footPrintL.X = RV_Hit_L.ImpactPoint.X;
-	footPrintL.Y = RV_Hit_L.ImpactPoint.Y;
-	footPrintL.Z = RV_Hit_L.ImpactPoint.Z;
+	if (onFootPrint)
+	{
+		float localFootZ_R = RV_Hit_R.ImpactPoint.Z - d2FootRLoc.Z;
+		float localFootZ_L = RV_Hit_L.ImpactPoint.Z - d2FootLLoc.Z;
+
+		if (RV_Hit_R.bBlockingHit) { toLocalHitPoint_R = FVector(0, 0, localFootZ_R); }
+		if (RV_Hit_L.bBlockingHit) { toLocalHitPoint_L = FVector(0, 0, localFootZ_L); }
+
+		if (RV_Hit_R.bBlockingHit && RV_Hit_L.bBlockingHit)
+		{
+			// 오른발이 위
+			if (localFootZ_R > localFootZ_L)
+			{
+				pelvis = localFootZ_L;
+				localFootZ_L = 0;
+			}
+			// 왼발이 위
+			else
+			{
+				pelvis = localFootZ_R;
+				localFootZ_R = 0;
+			}
+		}
+	}
+
+	footPrintR.X = toLocalHitPoint_R.X;
+	footPrintR.Y = toLocalHitPoint_R.Y;
+	footPrintR.Z = toLocalHitPoint_R.Z;
+
+	footPrintL.X = toLocalHitPoint_L.X;
+	footPrintL.Y = toLocalHitPoint_L.Y;
+	footPrintL.Z = toLocalHitPoint_L.Z;
 
 
 	if (onDebugText)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Purple,
-			FString::Printf(TEXT("is stick to? [ (L : %s), (R : %s) ]"),
-			(RV_Hit_L.bBlockingHit) ? ("Y") : ("N"), (RV_Hit_R.bBlockingHit) ? ("Y") : ("N"))
-			);
+		//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Purple,
+		//	FString::Printf(TEXT("is stick to? [ (L : %s), (R : %s) ]"),
+		//	(RV_Hit_L.bBlockingHit) ? ("Y") : ("N"), (RV_Hit_R.bBlockingHit) ? ("Y") : ("N"))
+		//	);
 
 		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red,
 			FString::Printf(TEXT("ImpactPoint R ? x : %f, y : %f, z : %f"),
@@ -246,13 +276,18 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 			FString::Printf(TEXT("ImpactPoint L ? x : %f, y : %f, z : %f"),
 				footPrintL.X, footPrintL.Y, footPrintL.Z)
 		);
+
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Purple,
+			FString::Printf(TEXT("pelvis? %f"),
+				pelvis)
+		);
 	}
 
 	if (onDebugPoint)
 	{
 		DrawDebugPoint(GetWorld(), d3FootRLoc, 10, FColor(255, 0, 0), false, 0.25f);
 		DrawDebugPoint(GetWorld(), d3FootLLoc, 10, FColor(0, 0, 255), false, 0.25f);
-		DrawDebugPoint(GetWorld(), centerLoc, 10, FColor(255, 0, 255), false, 0.25f);
+		DrawDebugPoint(GetWorld(), this->GetActorLocation(), 10, FColor(255, 0, 255), false, 0.25f);
 	}
 
 	if (onDebugLine)
@@ -287,4 +322,9 @@ FVector AHello_UE4_CACharacter::getFootPrintR()
 FVector AHello_UE4_CACharacter::getFootPrintL()
 {
 	return footPrintL;
+}
+
+float AHello_UE4_CACharacter::getPelvis()
+{
+	return pelvis;
 }
