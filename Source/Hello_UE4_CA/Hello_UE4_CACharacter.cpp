@@ -212,14 +212,16 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 
 	// blocked here
 
-	if (isDebugMode)
+	if (onDebugText)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Purple,
 			FString::Printf(TEXT("is stick to? [ (L : %s), (R : %s) ]"),
 			(RV_Hit_L.bBlockingHit) ? ("Y") : ("N"), (RV_Hit_R.bBlockingHit) ? ("Y") : ("N"))
 			);
+	}
 
-
+	if (onDebugLine)
+	{
 		DrawDebugPoint(GetWorld(), d3FootRLoc, 10, FColor(255, 0, 0), false, 0.25f);
 		DrawDebugPoint(GetWorld(), d3FootLLoc, 10, FColor(0, 0, 255), false, 0.25f);
 		DrawDebugPoint(GetWorld(), centerLoc, 10, FColor(255, 0, 255), false, 0.25f);

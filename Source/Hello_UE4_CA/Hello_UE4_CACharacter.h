@@ -71,7 +71,8 @@ public:
 
 	/** h529 **/
 private:
-	bool isDebugMode = true;
+	bool onDebugText = false;
+	bool onDebugLine = true;
 
 public:
 	virtual void Tick(float DeltaTime) override;
