@@ -53,6 +53,15 @@ AHello_UE4_CACharacter::AHello_UE4_CACharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	/** GOD FORGIVE ME **/
+	footPrintR.X = 0.f;
+	footPrintR.Y = 0.f;
+	footPrintR.Z = 0.f;
+
+	footPrintL.X = 0.f;
+	footPrintL.Y = 0.f;
+	footPrintL.Z = 0.f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -210,7 +219,16 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 		RV_TraceParams_L
 	);
 
-	// blocked here
+
+	// update foot print
+	footPrintR.X = RV_Hit_R.ImpactPoint.X;
+	footPrintR.Y = RV_Hit_R.ImpactPoint.Y;
+	footPrintR.Z = RV_Hit_R.ImpactPoint.Z;
+
+	footPrintL.X = RV_Hit_L.ImpactPoint.X;
+	footPrintL.Y = RV_Hit_L.ImpactPoint.Y;
+	footPrintL.Z = RV_Hit_L.ImpactPoint.Z;
+
 
 	if (onDebugText)
 	{
@@ -218,15 +236,29 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 			FString::Printf(TEXT("is stick to? [ (L : %s), (R : %s) ]"),
 			(RV_Hit_L.bBlockingHit) ? ("Y") : ("N"), (RV_Hit_R.bBlockingHit) ? ("Y") : ("N"))
 			);
+
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red,
+			FString::Printf(TEXT("ImpactPoint R ? x : %f, y : %f, z : %f"),
+				footPrintR.X, footPrintR.Y, footPrintR.Z)
+		);
+
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue,
+			FString::Printf(TEXT("ImpactPoint L ? x : %f, y : %f, z : %f"),
+				footPrintL.X, footPrintL.Y, footPrintL.Z)
+		);
 	}
 
-	if (onDebugLine)
+	if (onDebugPoint)
 	{
 		DrawDebugPoint(GetWorld(), d3FootRLoc, 10, FColor(255, 0, 0), false, 0.25f);
 		DrawDebugPoint(GetWorld(), d3FootLLoc, 10, FColor(0, 0, 255), false, 0.25f);
 		DrawDebugPoint(GetWorld(), centerLoc, 10, FColor(255, 0, 255), false, 0.25f);
+	}
 
+	if (onDebugLine)
+	{
 		float dbgLineLength = lineLength;
+
 		DrawDebugLine(
 			GetWorld(),
 			FVector(d2FootRLoc.X, d2FootRLoc.Y, d2FootRLoc.Z + dbgLineLength),
@@ -244,4 +276,15 @@ void AHello_UE4_CACharacter::Tick(float DeltaTime)
 			2.f
 		);
 	}
+}
+
+
+FVector AHello_UE4_CACharacter::getFootPrintR()
+{
+	return footPrintR;
+}
+
+FVector AHello_UE4_CACharacter::getFootPrintL()
+{
+	return footPrintL;
 }

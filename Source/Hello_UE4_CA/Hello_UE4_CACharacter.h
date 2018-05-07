@@ -71,10 +71,22 @@ public:
 
 	/** h529 **/
 private:
-	bool onDebugText = false;
+	bool onDebugText = true;
+	bool onDebugPoint = true;
 	bool onDebugLine = true;
+	
+	// it's bad idea but i don't have time anymore..
+	FVector footPrintR;
+	FVector footPrintL;
 
 public:
 	virtual void Tick(float DeltaTime) override;
+
+	/** find foot print **/
+	UFUNCTION(BlueprintPure, Category = "FootPrint")
+	FVector getFootPrintR();
+
+	UFUNCTION(BlueprintPure, Category = "FootPrint")
+	FVector getFootPrintL();
 };
 
