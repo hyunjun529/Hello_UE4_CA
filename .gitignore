@@ -77,4 +77,4 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 # i don't need maybe..?
-*.uasset
+#*.uasset
